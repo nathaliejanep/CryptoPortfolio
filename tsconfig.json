@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    // New option designed to work with package.json set to 'module'
+    "module": "NodeNext",
+    // Determines how TS will find imported code
+    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+    "sourceMap": true, // maps code back to TS and can help debugging
+    "outDir": "build"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"] // Do we need this?
+}
