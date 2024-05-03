@@ -9,7 +9,12 @@
     "build": "tsc",
     "dev:ts": "tsc -w",
     "dev:js": "nodemon build/server.js",
-    "dev": "concurrently npm:dev:*"
+    "watch": "tsc -w",
+    "node:5001": "nodemon build/server.js 5001 http://localhost:5001",
+    "node:5002": "nodemon build/server.js 5002 http://localhost:5002",
+    "node:5003": "nodemon build/server.js 5003 http://localhost:5003",
+    "nodes": "concurrently npm:node:*",
+    "dev": "concurrently 'npm:watch' 'npm:node:*'"
   },
   "keywords": [],
   "author": "",
