@@ -1,21 +1,21 @@
 export default class Block {
   timestamp: number;
   blockIndex: number;
-  previousBlockHash: string;
-  currentBlockHash: string;
+  prevHash: string;
+  hash: string;
   data: string;
 
   constructor(
     timestamp: number,
     blockIndex: number,
-    previousBlockHash: string,
-    currentBlockHash: string,
-    data: any // type?
+    prevHash: string,
+    hash: string,
+    data: any // type? create blockDatA?
   ) {
     this.timestamp = timestamp;
     this.blockIndex = blockIndex;
-    this.previousBlockHash = previousBlockHash;
-    this.currentBlockHash = currentBlockHash;
+    this.prevHash = prevHash;
+    this.hash = hash;
     this.data = data;
   }
 }
