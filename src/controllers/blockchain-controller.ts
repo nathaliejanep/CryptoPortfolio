@@ -6,7 +6,7 @@ const getBlockchain = (req: Request, res: Response, next: Function) => {
 };
 
 // Use for '/mine' endpoint
-const createBlock = (req: Request, res: Response, next: Function) => {
+const addBlock = (req: Request, res: Response, next: Function) => {
   const lastBlock = blockchain.getLastBlock();
 
   const timestamp = Date.now();
@@ -62,4 +62,4 @@ const synchronizeChain = (req: Request, res: Response, next: Function) => {
     });
 };
 
-export { createBlock, getBlockchain, synchronizeChain };
+export { addBlock, getBlockchain, synchronizeChain };
