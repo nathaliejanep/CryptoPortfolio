@@ -9,8 +9,8 @@ const listMembers = (req: Request, res: Response, next: Function) => {
 };
 
 const registerNode = (req: Request, res: Response, next: Function) => {
-  const node = req.body;
-  const nodeUrl = node.nodeUrl;
+  const { nodeUrl } = req.body;
+
   if (
     blockchain.memberNodes.indexOf(nodeUrl) === -1 &&
     blockchain.nodeUrl !== nodeUrl
@@ -32,22 +32,22 @@ const registerNode = (req: Request, res: Response, next: Function) => {
   }
 };
 
-const syncMembers = (url: string) => {
-  const members = [...blockchain.memberNodes, blockchain.nodeUrl];
+const syncMembers = async (url: string): Promise<void> => {
+  const memberNodes = [...blockchain.memberNodes, blockchain.nodeUrl];
 
   try {
-    members.forEach(async (member) => {
-      const body = { nodeUrl: member };
-      await fetch(`${url}`, {
+    for (const node of memberNodes) {
+      const body = { nodeUrl: node };
+      await fetch(`${url}/api/v1/members/register-node`, {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
           'Content-Type': 'application/json',
         },
       });
-    });
+    }
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 export { listMembers, registerNode };

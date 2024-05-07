@@ -7,38 +7,36 @@ export default class Blockchain {
   nodeUrl: string;
 
   constructor() {
-    this.chain = [];
+    this.chain = [this.createGenesisBlock()];
     this.memberNodes = [];
     this.nodeUrl = process.argv[3];
-    this.createBlock('0', '0', []);
   }
 
-  createBlock(
-    // timestamp: number, // TODO check if time works
+  private createGenesisBlock(): Block {
+    return new Block(Date.now(), 0, '0', 'genesis-hash', []);
+  }
+
+  getLastBlock(): Block {
+    return this.chain[this.chain.length - 1];
+  }
+
+  addBlock(data: any): void {
+    const prevBlock = this.getLastBlock();
+
+    const newTimestamp = Date.now();
+    const newIndex = prevBlock.index + 1;
+    const prevHash = prevBlock.hash;
+
+    const newHash = this.calculateHash(newTimestamp, prevHash, data);
+    const newBlock = new Block(newTimestamp, newIndex, prevHash, newHash, data);
+    this.chain.push(newBlock);
+  }
+
+  private calculateHash(
+    timestamp: number,
     prevHash: string,
-    hash: string,
-    data: string[]
-  ) {
-    const block = new Block(
-      Date.now(),
-      this.chain.length + 1,
-      prevHash,
-      hash,
-      data
-    );
-
-    this.chain.push(block);
-
-    return block;
-  }
-
-  getLastBlock() {
-    // return this.chain.at(-1);
-    return this.chain.slice(-1)[0];
-  }
-
-  // TODO change timestamp type
-  hashBlock(timestamp: any, prevHash: string, currData: string[]) {
+    currData: string[]
+  ): string {
     const hashToString =
       timestamp.toString() + prevHash + JSON.stringify(currData);
 
@@ -47,7 +45,7 @@ export default class Blockchain {
     return hash;
   }
 
-  validateChain(blockchain: any[]) {
+  isChainValid(blockchain:any):boolean {
     let isValid = true;
 
     for (let i = 1; i < blockchain.length; i++) {
@@ -56,7 +54,11 @@ export default class Blockchain {
 
       console.log('Validating block:', block);
 
-      const hash = this.hashBlock(block.timestamp, prevBlock.hash, block.data);
+      const hash = this.calculateHash(
+        block.timestamp,
+        prevBlock.hash,
+        block.data
+      );
 
       if (hash !== block.hash) isValid = false;
       if (block.prevHash !== block.hash) isValid = false;
