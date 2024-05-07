@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  createBlock,
+  addBlock,
   getBlockchain,
   synchronizeChain,
 } from '../controllers/blockchain-controller.js';
@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 router.route('/').get(getBlockchain);
-router.route('/mine').post(createBlock);
+router.route('/mine').post(addBlock);
 router.route('/concensus').get(synchronizeChain);
 
 export default router;

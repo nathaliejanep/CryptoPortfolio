@@ -8,6 +8,7 @@ export default class Blockchain {
 
   constructor() {
     this.chain = [];
+    this.memberNodes = [];
     this.nodeUrl = process.argv[3];
     this.createBlock('0', '0', []);
   }
