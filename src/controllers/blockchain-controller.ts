@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { blockchain } from '../startup.js';
 import { Block } from 'ethers';
+import { User } from '../models/User.js';
 
 const getBlockchain = (req: Request, res: Response, next: Function) => {
   res.status(200).json({ success: true, data: blockchain });
@@ -8,8 +9,11 @@ const getBlockchain = (req: Request, res: Response, next: Function) => {
 
 // Use for '/mine' endpoint
 const addBlock = (req: Request, res: Response, next: Function) => {
+  const { username, cryptoHoldings } = req.body;
+  const userData: User = { username, cryptoHoldings };
+
   const data = req.body;
-  const block = blockchain.addBlock(data);
+  const block = blockchain.addBlock(userData);
 
   res.status(201).json({
     success: true,
@@ -33,7 +37,7 @@ const synchronizeChain = async (req: Request, res: Response) => {
       if (res.ok) {
         const result = await res.json();
         const resultLength = result.blockchain.length;
-        console.log('result', result);
+
         if (resultLength > maxLength) {
           maxLength = resultLength;
           longestChain = result.blockchain;
