@@ -1,25 +1,26 @@
 import { Request, Response } from 'express';
 import { blockchain } from '../startup.js';
-import { Block } from 'ethers';
-import { User } from '../models/User.js';
+import Block from '../models/Block.js';
+import FileHandler from '../utils/fileHandler.js';
 
 const getBlockchain = (req: Request, res: Response, next: Function) => {
   res.status(200).json({ success: true, data: blockchain });
 };
 
 // Use for '/mine' endpoint
-const addBlock = (req: Request, res: Response, next: Function) => {
-  const { username, cryptoHoldings } = req.body;
-  const userData: User = { username, cryptoHoldings };
-
+const addBlock = async (req: Request, res: Response, next: Function) => {
   const data = req.body;
-  const block = blockchain.addBlock(userData);
+  const block = await blockchain.addBlock(data);
 
   res.status(201).json({
     success: true,
     msg: 'Block created successfully!',
-    block,
+    data: block,
   });
+
+  const file = new FileHandler();
+  // Write the entire blockchain to the file
+  await file.write('data', `blockchain-${process.argv[2]}.json`, blockchain);
 };
 
 // Use for '/concensus' endpoint
