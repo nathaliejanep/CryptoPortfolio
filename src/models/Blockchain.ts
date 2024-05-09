@@ -1,4 +1,5 @@
 import { createHash } from '../utils/crypto-lib.js';
+import FileHandler from '../utils/fileHandler.js';
 import Block from './Block.js';
 
 export default class Blockchain {
@@ -20,7 +21,22 @@ export default class Blockchain {
     return this.chain[this.chain.length - 1];
   }
 
-  addBlock(data: any): void {
+  async loadChainFromFile() {
+    try {
+      const file = new FileHandler();
+      const data = await file.read(
+        'data',
+        `blockchain-${process.argv[2]}.json`
+      );
+      // Parse the data directly into this.chain
+      this.chain = JSON.parse(data);
+    } catch (err) {
+      console.error(`Error loading blockchain from file: ${err}`);
+      // Handle error (create new genesis block or stop application)
+    }
+  }
+
+  async addBlock(data: any) {
     const prevBlock = this.getLastBlock();
 
     const newTimestamp = Date.now();
@@ -29,6 +45,7 @@ export default class Blockchain {
 
     const newHash = this.calculateHash(newTimestamp, prevHash, data);
     const newBlock = new Block(newTimestamp, newIndex, prevHash, newHash, data);
+
     this.chain.push(newBlock);
   }
 
@@ -45,7 +62,7 @@ export default class Blockchain {
     return hash;
   }
 
-  isChainValid(blockchain:any):boolean {
+  isChainValid(blockchain: any): boolean {
     let isValid = true;
 
     for (let i = 1; i < blockchain.length; i++) {
