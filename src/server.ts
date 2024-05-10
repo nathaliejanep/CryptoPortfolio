@@ -6,11 +6,16 @@ import cryptoRouter from './routes/crypto-routes.js';
 import memberRouter from './routes/member-routes.js';
 import ErrorResponse from './models/ErrorResponse.js';
 import errorHandler from './middleware/errorHandler.js';
+import logger from './middleware/logger.js';
 
 const PORT = process.argv[2]; // 5001-3
 
 const app = express();
 app.use(express.json());
+
+// TODO implement when solved global dotenv
+// if (process.env.NODE_ENV === 'development')
+app.use(logger);
 
 app.use('/api/v1/blockchain', blockchainRouter);
 app.use('/api/v1/members', memberRouter);
