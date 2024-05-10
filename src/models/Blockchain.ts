@@ -1,6 +1,13 @@
 import { createHash } from '../utils/crypto-lib.js';
 import FileHandler from '../utils/fileHandler.js';
 import Block from './Block.js';
+// TODO lös detta globalt!
+import dotenv from 'dotenv';
+import { join, resolve } from 'path';
+
+const __basedir = join(process.cwd(), 'src');
+const envPath = resolve(__basedir, '../src/config/.env');
+dotenv.config({ path: envPath });
 
 export default class Blockchain {
   chain: Block[];
@@ -14,7 +21,15 @@ export default class Blockchain {
   }
 
   private createGenesisBlock(): Block {
-    return new Block(Date.now(), 0, '0', 'genesis-hash', []);
+    return new Block(
+      Date.now(),
+      0,
+      '0',
+      'genesis-hash',
+      [],
+      2048,
+      +process.env.DIFFICULTY
+    );
   }
 
   getLastBlock(): Block {
@@ -36,32 +51,56 @@ export default class Blockchain {
     }
   }
 
+  // TODO döp om till createBlock
   async addBlock(data: any) {
+    // TODO Döp om till lastBlock
     const prevBlock = this.getLastBlock();
-
     const newTimestamp = Date.now();
     const newIndex = prevBlock.index + 1;
     const prevHash = prevBlock.hash;
+    const { nonce, difficulty } = this.proofOfWork(prevBlock.hash, data);
 
-    const newHash = this.calculateHash(newTimestamp, prevHash, data);
-    const newBlock = new Block(newTimestamp, newIndex, prevHash, newHash, data);
+    const newHash = this.calculateHash(
+      newTimestamp,
+      prevHash,
+      data,
+      nonce,
+      difficulty
+    );
+    const newBlock = new Block(
+      newTimestamp,
+      newIndex,
+      prevHash,
+      newHash,
+      data,
+      nonce,
+      difficulty
+    );
 
     this.chain.push(newBlock);
   }
 
+  // TODO kolla om difficulty stämmer såhär
   private calculateHash(
     timestamp: number,
     prevHash: string,
-    currData: string[]
+    currData: string[],
+    nonce: number,
+    difficulty: number
   ): string {
+    // TODO heta så eller stringToHsh??
     const hashToString =
-      timestamp.toString() + prevHash + JSON.stringify(currData);
+      timestamp.toString() +
+      prevHash +
+      JSON.stringify(currData) +
+      nonce +
+      +difficulty;
 
     const hash = createHash(hashToString);
-
     return hash;
   }
 
+  // TODO kolla om vi ska ta in parameter eller this.chain
   isChainValid(blockchain: any): boolean {
     let isValid = true;
 
@@ -74,13 +113,47 @@ export default class Blockchain {
       const hash = this.calculateHash(
         block.timestamp,
         prevBlock.hash,
-        block.data
+        block.data,
+        block.nonce,
+        block.difficulty
       );
 
       if (hash !== block.hash) isValid = false;
       if (block.prevHash !== block.hash) isValid = false;
-
-      return isValid;
     }
+    return isValid;
+  }
+
+  proofOfWork(prevHash: string, data: any) {
+    const lastBlock = this.getLastBlock();
+    let difficulty: number;
+    let hash: string;
+    let timestamp: number;
+    let nonce = 0;
+
+    do {
+      nonce++;
+      timestamp = Date.now();
+
+      difficulty = this.calcDifficulty(lastBlock, timestamp);
+      hash = this.calculateHash(timestamp, prevHash, data, nonce, difficulty);
+    } while (!this.isValidHash(hash, difficulty));
+
+    return { nonce, difficulty, timestamp };
+  }
+
+  calcDifficulty(lastBlock: Block, timestamp: number) {
+    const MINE_RATE = +process.env.MINE_RATE;
+    const { difficulty } = lastBlock;
+
+    if (difficulty < 1) return 1;
+
+    return timestamp - lastBlock.timestamp > MINE_RATE
+      ? +difficulty + 1
+      : +difficulty - 1;
+  }
+
+  isValidHash(hash: string, difficulty: number): boolean {
+    return hash.substring(0, difficulty) === '0'.repeat(difficulty);
   }
 }
