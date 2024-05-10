@@ -1,5 +1,5 @@
 import { ICryptoHolding } from './interfaces/ICryptoHoldings.js';
-
+// TODO methods for user authentication, registration, and managing their portfolio.
 export class User {
   username: string;
   cryptoHoldings: ICryptoHolding[]; // List of cryptocurrency holdings for the user

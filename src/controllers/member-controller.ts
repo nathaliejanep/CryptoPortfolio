@@ -3,6 +3,7 @@ import { blockchain } from '../startup.js';
 
 const listMembers = (req: Request, res: Response, next: Function) => {
   // TODO hantera om inga members
+  // TODO fixa så vi får rätt nodeUrl för egen node
   res
     .status(200)
     .json({ success: true, statusCode: 200, data: blockchain.memberNodes });

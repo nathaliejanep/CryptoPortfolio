@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import { join, join as joinPath } from 'path';
-
+// TODO fix Error loading blockchain from file: SyntaxError: Unexpected end of JSON input
 class FileHandler {
   private readonly __basedir: string;
 
