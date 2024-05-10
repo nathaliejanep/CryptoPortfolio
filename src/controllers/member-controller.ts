@@ -1,35 +1,41 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { blockchain } from '../startup.js';
+import ErrorResponse from '../models/ErrorResponse.js';
 
-const listMembers = (req: Request, res: Response, next: Function) => {
-  // TODO hantera om inga members
-  // TODO fixa så vi får rätt nodeUrl för egen node
-  res
-    .status(200)
-    .json({ success: true, statusCode: 200, data: blockchain.memberNodes });
+const listMembers = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (blockchain.memberNodes.length === 0) {
+      throw new ErrorResponse(404, 'No members found');
+    }
+
+    res
+      .status(200)
+      .json({ success: true, statusCode: 200, data: blockchain.memberNodes });
+  } catch (err) {
+    next(err);
+  }
 };
 
-const registerNode = (req: Request, res: Response, next: Function) => {
+const registerNode = (req: Request, res: Response, next: NextFunction) => {
   const { nodeUrl } = req.body;
+  try {
+    if (
+      blockchain.memberNodes.indexOf(nodeUrl) === -1 &&
+      blockchain.nodeUrl !== nodeUrl
+    ) {
+      blockchain.memberNodes.push(nodeUrl);
+      syncMembers(nodeUrl);
 
-  if (
-    blockchain.memberNodes.indexOf(nodeUrl) === -1 &&
-    blockchain.nodeUrl !== nodeUrl
-  ) {
-    blockchain.memberNodes.push(nodeUrl);
-    syncMembers(nodeUrl);
-
-    res.status(201).json({
-      success: true,
-      statusCode: 201,
-      data: { msg: `Noden ${nodeUrl} är registrerad.` },
-    });
-  } else {
-    res.status(400).json({
-      success: false,
-      statusCode: 400,
-      data: { msg: `Node ${nodeUrl} är redan registrerad.` },
-    });
+      res.status(201).json({
+        success: true,
+        statusCode: 201,
+        data: { msg: `Noden ${nodeUrl} är registrerad.` },
+      });
+    } else {
+      throw new ErrorResponse(400, `Node ${nodeUrl} is already registered`);
+    }
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -48,7 +54,7 @@ const syncMembers = async (url: string): Promise<void> => {
       });
     }
   } catch (err) {
-    console.error(err);
+    throw new ErrorResponse(500, `Error synchronizing members: ${err.msg}`);
   }
 };
 export { listMembers, registerNode };
