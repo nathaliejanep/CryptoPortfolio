@@ -16,7 +16,7 @@ const getBlockchain = (req: Request, res: Response, next: NextFunction) => {
 const addBlock = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = req.body;
-    const block = await blockchain.addBlock(data);
+    const block = await blockchain.createBlock(data);
 
     res.status(201).json({
       success: true,

@@ -43,44 +43,35 @@ export default class Blockchain {
         'data',
         `blockchain-${process.argv[2]}.json`
       );
-      // Parse the data directly into this.chain
       this.chain = JSON.parse(data);
     } catch (err) {
       console.error(`Error loading blockchain from file: ${err}`);
-      // Handle error (create new genesis block or stop application)
+      // TODO Handle error better (create new genesis block or stop application?)
     }
   }
 
-  // TODO döp om till createBlock
-  async addBlock(data: any) {
-    // TODO Döp om till lastBlock
-    const prevBlock = this.getLastBlock();
+  async createBlock(data: any): Promise<Block> {
+    const lastBlock = this.getLastBlock();
     const newTimestamp = Date.now();
-    const newIndex = prevBlock.index + 1;
-    const prevHash = prevBlock.hash;
-    const { nonce, difficulty } = this.proofOfWork(prevBlock.hash, data);
+    const newIndex = lastBlock.index + 1;
+    const prevHash = lastBlock.hash;
 
-    const newHash = this.calculateHash(
-      newTimestamp,
-      prevHash,
-      data,
-      nonce,
-      difficulty
-    );
+    const { nonce, difficulty, hash } = this.proofOfWork(lastBlock.hash, data);
+
     const newBlock = new Block(
       newTimestamp,
       newIndex,
       prevHash,
-      newHash,
+      hash,
       data,
       nonce,
       difficulty
     );
 
     this.chain.push(newBlock);
+    return newBlock;
   }
 
-  // TODO kolla om difficulty stämmer såhär
   private calculateHash(
     timestamp: number,
     prevHash: string,
@@ -138,7 +129,7 @@ export default class Blockchain {
       hash = this.calculateHash(timestamp, prevHash, data, nonce, difficulty);
     } while (!this.isValidHash(hash, difficulty));
 
-    return { nonce, difficulty, timestamp };
+    return { timestamp, nonce, difficulty, hash };
   }
 
   calcDifficulty(lastBlock: Block, timestamp: number) {
@@ -152,7 +143,7 @@ export default class Blockchain {
       : +difficulty - 1;
   }
 
-  isValidHash(hash: string, difficulty: number): boolean {
+  private isValidHash(hash: string, difficulty: number): boolean {
     return hash.substring(0, difficulty) === '0'.repeat(difficulty);
   }
 }
