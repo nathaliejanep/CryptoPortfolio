@@ -88,15 +88,14 @@ export default class Blockchain {
     nonce: number,
     difficulty: number
   ): string {
-    // TODO heta så eller stringToHsh??
-    const hashToString =
+    const stringToHash =
       timestamp.toString() +
       prevHash +
       JSON.stringify(currData) +
       nonce +
       +difficulty;
 
-    const hash = createHash(hashToString);
+    const hash = createHash(stringToHash);
     return hash;
   }
 
