@@ -43,10 +43,19 @@ export default class Blockchain {
         'data',
         `blockchain-${process.argv[2]}.json`
       );
-      this.chain = JSON.parse(data);
+
+      if (data) {
+        this.chain = JSON.parse(data);
+      } else {
+        // If there is no initial data, write file with genesis block
+        await file.write(
+          'data',
+          `blockchain-${process.argv[2]}.json`,
+          this.chain
+        );
+      }
     } catch (err) {
       console.error(`Error loading blockchain from file: ${err}`);
-      // TODO Handle error better (create new genesis block or stop application?)
     }
   }
 

@@ -18,11 +18,6 @@ class FileHandler {
         'utf-8'
       );
 
-      // Check if the file is empty
-      if (!data.trim()) {
-        return null;
-      }
-
       return data;
     } catch (err) {
       console.error(`Error reading file: ${err}`);
