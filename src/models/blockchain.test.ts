@@ -32,7 +32,7 @@ describe('Blockchain', () => {
 
       const data = ['Transaction 1', 'Transaction 2'];
       const prevBlock = blockchain.getLastBlock();
-      await blockchain.addBlock(data);
+      await blockchain.createBlock(data);
       const lastBlock = blockchain.getLastBlock();
       expect(lastBlock.index).toBe(prevBlock.index + 1);
       expect(lastBlock.data).toEqual(data);
